@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let totalTime = 0;
     let remainingTime = 0;
     let pcrSettings = {};
+    let selectedSpecies = null; // 新增：用于存储当前选择的物种
+    let uraniumAdded = false; // 新增：标记是否添加了铀
     
     // DNA可视化相关变量
     let dnaCanvas;
@@ -25,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateStepTitle();
     initDnaVisualization();
     initTraits();
+    initSpeciesSelection(); // 新增：初始化物种选择
     
     // 初始化DNA可视化
     function initDnaVisualization() {
@@ -163,6 +166,36 @@ document.addEventListener('DOMContentLoaded', function() {
         updateStepTitle();
     }
     
+    // 新增：物种选择功能
+    function initSpeciesSelection() {
+        // 为每个物种选择按钮添加点击事件
+        document.querySelectorAll('.select-species').forEach(button => {
+            button.addEventListener('click', function() {
+                const speciesCard = this.closest('.species-card');
+                if (speciesCard) {
+                    // 获取物种类型
+                    const species = speciesCard.getAttribute('data-species');
+                    
+                    // 更新选中状态
+                    document.querySelectorAll('.species-card').forEach(card => {
+                        card.classList.remove('selected');
+                    });
+                    speciesCard.classList.add('selected');
+                    
+                    // 更新全局选中物种
+                    selectedSpecies = species;
+                    console.log(`已选择物种: ${species}`);
+                    
+                    // 启用下一步按钮
+                    const nextButton = document.getElementById('species-selection-next');
+                    if (nextButton) {
+                        nextButton.disabled = false;
+                    }
+                }
+            });
+        });
+    }
+    
     // 步骤导航按钮点击事件
     document.querySelectorAll('.list-group-item[data-step]').forEach(button => {
         button.addEventListener('click', function() {
@@ -188,7 +221,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 console.log(`正在从步骤 ${currentStepNum} 导航到步骤 ${nextStep}`); // 调试信息
                 
-                if (nextStep <= 5) {
+                if (nextStep <= 8) {
                     navigateToStep(nextStep);
                     // 更新当前全局步骤
                     if (nextStep > currentStep) {
@@ -200,7 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const nextStep = currentStep + 1;
                 console.log(`使用全局变量导航从 ${currentStep} 到 ${nextStep}`); // 调试信息
                 
-                if (nextStep <= 5) {
+                if (nextStep <= 8) {
                     navigateToStep(nextStep);
                     if (nextStep > currentStep) {
                         currentStep = nextStep;
@@ -262,15 +295,98 @@ document.addEventListener('DOMContentLoaded', function() {
         resetExperiment();
     });
     
+    // 第9步中的重新开始实验按钮点击事件
+    document.getElementById('restart-experiment-2')?.addEventListener('click', function() {
+        resetExperiment();
+    });
+    
     // PCR结果跳转按钮点击事件
     document.getElementById('next-to-results')?.addEventListener('click', function() {
         console.log('跳转到结果页面');
-        navigateToStep(7);
+        navigateToStep(8);
         // 更新全局步骤
-        if (7 > currentStep) {
-            currentStep = 7;
+        if (8 > currentStep) {
+            currentStep = 8;
+        }
+        
+        // 在结果分析页加载后，为"下一步"按钮添加点击事件
+        const resultToProductBtn = document.querySelector('#step-8 .next-step');
+        if (resultToProductBtn) {
+            resultToProductBtn.addEventListener('click', function() {
+                // 在进入实验产物页面前，根据是否添加铀更新特殊产物
+                updateProductPage();
+                navigateToStep(9);
+                if (9 > currentStep) {
+                    currentStep = 9;
+                }
+            });
         }
     });
+    
+    // 函数：更新实验产物页面
+    function updateProductPage() {
+        const specialProductContainer = document.getElementById('special-product-container');
+        const regularProductContainer = document.getElementById('regular-product-container');
+        if (!specialProductContainer || !regularProductContainer) return;
+        
+        // 根据物种类型和是否添加铀设置产物图片
+        if (selectedSpecies === 'animal') {
+            // 动物PCR产物逻辑
+            if (uraniumAdded) {
+                // 加入铀，显示product_image3.jpg和22.jpg
+                regularProductContainer.innerHTML = `
+                    <img src="images/product_image3.jpg" class="img-fluid" alt="动物PCR产物" onerror="this.src='https://via.placeholder.com/400x300?text=动物PCR产物'">
+                    <p class="mt-3">动物DNA样本加入铀后的PCR扩增产物，呈现强烈的荧光绿色。</p>
+                `;
+                specialProductContainer.style.display = 'block';
+                specialProductContainer.innerHTML = `
+                    <img src="images/22.jpg" class="img-fluid" alt="特殊处理的动物PCR产物" onerror="this.src='https://via.placeholder.com/400x300?text=特殊处理的动物PCR产物（荧光绿色）'">
+                    <p class="mt-3 text-danger"><strong>异常PCR产物警告：</strong>此动物样本添加了铀，产物呈现强烈的荧光绿色，含有放射性物质，存在多条非特异性条带。样品在黑暗中会自发光。</p>
+                `;
+            } else {
+                // 没加铀，显示1 (2).jpg和product_image2.jpg
+                regularProductContainer.innerHTML = `
+                    <img src="images/1 (2).jpg" class="img-fluid" alt="动物PCR产物" onerror="this.src='https://via.placeholder.com/400x300?text=动物PCR产物'">
+                    <p class="mt-3">动物DNA的PCR扩增产物，适用于基因分型和系统进化研究。</p>
+                `;
+                specialProductContainer.style.display = 'block';
+                specialProductContainer.innerHTML = `
+                    <img src="images/product_image2.jpg" class="img-fluid" alt="特殊动物PCR产物" onerror="this.src='https://via.placeholder.com/400x300?text=特殊动物PCR产物'">
+                    <p class="mt-3">用于娱乐目的的动物PCR产物，可用于特殊实验研究。</p>
+                `;
+            }
+        } else if (selectedSpecies === 'plant') {
+            // 植物PCR产物逻辑
+            regularProductContainer.innerHTML = `
+                <img src="images/plant.jpg" class="img-fluid" alt="植物PCR产物" onerror="this.src='https://via.placeholder.com/400x300?text=植物PCR产物'">
+                <p class="mt-3">植物DNA的PCR扩增产物，可用于种质资源鉴定和遗传多样性分析。</p>
+            `;
+            
+            if (uraniumAdded) {
+                specialProductContainer.style.display = 'block';
+                specialProductContainer.innerHTML = `
+                    <img src="images/plant666.jpg" class="img-fluid" alt="特殊处理的植物PCR产物" onerror="this.src='https://via.placeholder.com/400x300?text=特殊处理的植物PCR产物（荧光绿色）'">
+                    <p class="mt-3 text-danger"><strong>异常PCR产物警告：</strong>此植物样本添加了特殊试剂，产物呈现强烈的荧光绿色，含有放射性物质，存在多条非特异性条带。样品在黑暗中会自发光，高度不稳定，可能导致植物DNA突变。</p>
+                `;
+            } else {
+                specialProductContainer.style.display = 'none';
+            }
+        } else if (selectedSpecies === 'microorganism') {
+            // 微生物PCR产物逻辑
+            regularProductContainer.innerHTML = `
+                <img src="images/22.jpg" class="img-fluid" alt="微生物PCR产物" onerror="this.src='https://via.placeholder.com/400x300?text=微生物PCR产物'">
+                <p class="mt-3">微生物DNA的PCR扩增产物，适用于菌种鉴定和微生物群落分析。</p>
+            `;
+            specialProductContainer.style.display = 'none';
+        } else {
+            // 默认显示
+            regularProductContainer.innerHTML = `
+                <img src="images/product_image1.jpg" class="img-fluid" alt="常规PCR产物" onerror="this.src='https://via.placeholder.com/400x300?text=常规PCR产物'">
+                <p class="mt-3">常规PCR反应产生的DNA片段，可用于克隆、测序等后续实验。</p>
+            `;
+            specialProductContainer.style.display = 'none';
+        }
+    }
     
     // 为第5步的下一步按钮添加特定的处理
     const step5NextButton = document.querySelector('#step-5 .next-step');
@@ -295,28 +411,33 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const stepNum = activeStep.getAttribute('data-step');
         const stepTitles = [
+            "物种选择",
             "实验准备",
             "DNA选取",
             "引物制作",
             "样品制备",
             "PCR反应设置",
             "运行PCR仪",
-            "结果分析"
+            "结果分析",
+            "实验产物"
         ];
         
-        // 使用步骤索引（0-6）获取对应标题
+        // 使用步骤索引（0-8）获取对应标题
         const stepTitle = stepTitles[parseInt(stepNum) - 1] || "未知步骤";
         document.getElementById('step-title').textContent = stepTitle;
-        
-        // 更新导航栏中的步骤标签
-        document.querySelectorAll('.list-group-item[data-step]').forEach((item, index) => {
-            item.textContent = `${index + 1}. ${stepTitles[index]}`;
-        });
     }
     
     // 函数：添加试剂
     function addReagent(reagent, button) {
         if (!addedReagents.has(reagent)) {
+            // 处理铀的特殊情况
+            if (reagent === 'uranium') {
+                if (!confirm('不是哥们，你真的要加铀？')) {
+                    return; // 用户取消添加
+                }
+                uraniumAdded = true; // 标记已添加铀
+            }
+            
             addedReagents.add(reagent);
             
             // 更新按钮状态
@@ -331,9 +452,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // 更新试管液体高度
             updateTubeLiquid();
             
-            // 如果所有试剂都已添加，启用下一步按钮
-            if (addedReagents.size === 7) {
-                document.querySelector('#step-4 .next-step').disabled = false;
+            // 如果所有必要试剂都已添加，启用下一步按钮（注意：铀不是必须的）
+            const requiredReagents = ['buffer', 'dntps', 'primer-f', 'primer-r', 'template', 'polymerase', 'water'];
+            const allRequiredAdded = requiredReagents.every(r => addedReagents.has(r));
+            
+            if (allRequiredAdded) {
+                document.querySelector('#step-5 .next-step').disabled = false;
             }
         }
     }
@@ -341,7 +465,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // 函数：更新试管液体高度
     function updateTubeLiquid() {
         const tubeLiquid = document.querySelector('.tube-liquid');
-        const height = (addedReagents.size / 7) * 100;
+        // 计算高度百分比（基于7种必需试剂）
+        const requiredReagents = ['buffer', 'dntps', 'primer-f', 'primer-r', 'template', 'polymerase', 'water'];
+        const addedRequiredCount = requiredReagents.filter(r => addedReagents.has(r)).length;
+        const height = (addedRequiredCount / 7) * 100;
         tubeLiquid.style.height = `${height}%`;
         
         // 根据不同试剂更改液体颜色
@@ -350,6 +477,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         if (addedReagents.has('polymerase')) {
             tubeLiquid.style.backgroundColor = '#ade8f4';
+        }
+        if (addedReagents.has('uranium')) {
+            tubeLiquid.style.backgroundColor = '#39ff14'; // 铀添加后液体变为荧光绿色
+            tubeLiquid.classList.add('uranium-added'); // 添加发光动画效果
+        } else {
+            tubeLiquid.classList.remove('uranium-added'); // 移除发光动画效果
         }
     }
     
@@ -594,9 +727,48 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.font = '10px Arial';
         ctx.fillText('样品', sampleX - 15, 30);
         
-        // 基于引物设计正确与否显示不同的电泳结果
-        if (primerCorrect) {
-            // 正确引物 - 显示单一清晰条带
+        // 检查是否添加了铀
+        if (uraniumAdded) {
+            // 添加了铀 - 显示异常的电泳结果
+            // 主要条带是荧光绿色
+            const bandPositionBase = 200; // 基础条带位置
+            ctx.fillStyle = '#39ff14'; // 荧光绿色
+            ctx.fillRect(sampleX - 15, bandPositionBase, 30, 4);
+            
+            // 添加发光效果
+            ctx.shadowColor = '#39ff14';
+            ctx.shadowBlur = 15;
+            ctx.fillRect(sampleX - 15, bandPositionBase, 30, 4);
+            ctx.shadowBlur = 0; // 重置阴影效果
+            
+            // 添加多条非特异性条带
+            for (let i = 0; i < 5; i++) {
+                const randomPos = 100 + Math.floor(Math.random() * 200);
+                const randomWidth = 2 + Math.floor(Math.random() * 3);
+                ctx.fillStyle = `rgba(57, 255, 20, ${0.3 + Math.random() * 0.4})`;
+                
+                // 添加发光效果
+                ctx.shadowColor = '#39ff14';
+                ctx.shadowBlur = 10;
+                ctx.fillRect(sampleX - 15, randomPos, 30, randomWidth);
+                ctx.shadowBlur = 0; // 重置阴影效果
+            }
+            
+            // 更新结果分析
+            document.getElementById('product-size').textContent = "约500 bp，但存在异常条带";
+            document.getElementById('amplification-efficiency').textContent = "异常，可能受到污染";
+            document.getElementById('purity-assessment').textContent = "低纯度，存在多条非特异性条带";
+            
+            // 显示警告信息
+            document.getElementById('experiment-result-message').innerHTML = `
+                <div class="alert alert-warning">
+                    <p><strong>PCR实验异常!</strong></p>
+                    <p>您的PCR反应体系中可能存在污染或抑制物，导致非特异性扩增。</p>
+                    <p>特别提示：样品呈现荧光绿色，在黑暗中会发光，这可能与铀等放射性物质的添加有关。</p>
+                </div>
+            `;
+        } else if (primerCorrect) {
+            // 正确引物且无铀 - 显示单一清晰条带
             const bandPositionBase = 200; // 基础条带位置
             const bandWidth = 4; // 条带宽度
             
@@ -618,9 +790,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     <p>产物可用于下游实验。</p>
                 </div>
             `;
-            
         } else {
-            // 错误引物 - 显示多条模糊条带或无条带
+            // 错误引物且无铀 - 显示多条模糊条带或无条带
             // 模拟非特异性扩增
             for (let i = 0; i < 4; i++) {
                 const randomPos = 100 + Math.floor(Math.random() * 200);
@@ -651,6 +822,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function resetExperiment() {
         // 重置添加的试剂
         addedReagents.clear();
+        uraniumAdded = false; // 重置铀添加状态
+        
         document.getElementById('reagents-added').textContent = '0';
         document.querySelectorAll('.add-reagent').forEach(button => {
             button.classList.remove('added');
@@ -662,10 +835,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('.tube-liquid').style.height = '0';
         
         // 重置按钮状态
-        document.querySelector('#step-2 .next-step').disabled = false; // DNA选取步骤可以直接进入
+        document.querySelector('#step-3 .next-step').disabled = false; // DNA选取步骤可以直接进入
         document.getElementById('dna-selection-next').disabled = true;
         document.getElementById('primer-design-next').disabled = true;
-        document.querySelector('#step-4 .next-step').disabled = true;
+        document.querySelector('#step-5 .next-step').disabled = true;
         document.getElementById('next-to-results').disabled = true;
         document.getElementById('start-pcr').disabled = false;
         document.getElementById('stop-pcr').disabled = true;
@@ -1151,7 +1324,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 name: "高产量",
                 description: "提高植物的产量和生物量",
                 icon: "🌾",
-                sequence: "ATGGCGGCGGCGGCGATGAGGGTCACCAAGGTCATCGCGGCGGTGGCGGCGGCCGTCGTCGTCGTCGTCGCCGCCATCATCATCATGGTGGCGGAGGCCGGCGTCGGCGGCGAGGTCGGCGGCGGCGAGGGCGAGGGCGAGGCAGCCGCCGCCGCCGTCGCCGCAGTCGTCACCATCACCTCCTCCAAGAAGATGATGCGCAGCCGCCGCCGCACTGACGACGACGACGACGATGATGATGACGATCACGATGATGACGACGACGACGACGGGTACAAGAAGAAGAACTACCGCCTCCTCTCCTCCCGCCGCCGCAAGGCGCGCAAGAAGAAGAAGGTCGAGGACGACGACGAGTACGAGGAGGGCGCCTGA"
+                sequence: "ATGGCGGCGGCGGCGATGAGGGTCACCAAGGTCATCGCGGCGGTGGCGGCGGCCGTCGTCGTCGTCGTCGCCGCCATCATCATCATGGTGGCGGAGGCCGGCGTCGGCGGCGAGGTCGGCGGCGGCGAGGGCGAGGGCGAGGCAGCCGCCGCCGCCGTCGCCGCAGTCGTCACCATCACCTCCTCCAAGAAGATGATGCGCAGCCGCCGCCGCACTGACGACGACGACGACGATGATGATGACGATCACGATGATGACGACGACGACGGGTACAAGAAGAAGAACTACCGCCTCCTCTCCTCCCGCCGCCGCAAGGCGCGCAAGAAGAAGAAGGTCGAGGACGACGACGAGTACGAGGAGGGCGCCTGA"
             },
             {
                 id: 6,
@@ -1186,7 +1359,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 name: "高油脂含量",
                 description: "提高植物的油脂含量",
                 icon: "🛢️",
-                sequence: "ATGGGCGGCGGCGGGCTCCTCCTCCTCCTCCTCCTCCTCCTCCTCCTCCTCCTGCTGATGATGATCATCATCATCCATCATCGTCGTCGTCGTCGTCGTCGTCGCAGCAGCAGCAGCAGCAGCAGCAGGAGCAGGAGGAGGAAGAAGAAGAAGAAGAAGGAGGCAGCGGCAGCGGCAGCGGCGGTGGCGGCGGCGGCGGCGGCGGCGGCGGCGGCGGCGGCGGCGATGAAGAAGAAGCAGCCGCCGCTGCTGCTGCTGCAGCAGCAGGGCGGCGGCGGCGGCGGCGGAGGATGATGATGATGCATCATGATGATGATGATGATGATGTCATCATCATCATCATCATCATCACTGCAACTGCAACTGCTTGA"
+                sequence: "ATGGGCGGCGGCGGGCTCCTCCTCCTCCTCCTCCTCCTCCTCCTCCTCCTCCTGCTGATGATGATCATCATCATCCATCATCGTCGTCGTCGTCGTCGTCGTCGCAGCAGCAGCAGCAGCAGCAGCAGGAGCAGGAGGAGGAAGAAGAAGAAGAAGAAGGAGGCAGCGGCAGCGGCAGCGGCGGTGGCGGCGGCGGCGGCGGCGGCGGCGGCGGCGGCGGCGGCGGCGGCGGCGGCGGCGGCGGCGGCGGCGGCGGCGATGAAGAAGAAGCAGCCGCCGCTGCTGCTGCTGCAGCAGCAGGGCGGCGGCGGCGGCGGCGGAGGATGATGATGATGCATCATGATGATGATGATGATGATGTCATCATCATCATCATCATCATCACTGCAACTGCAACTGCTTGA"
             },
             {
                 id: 11,

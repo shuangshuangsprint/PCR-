@@ -273,4 +273,62 @@ body {
 
 .dna-polymerase {
     fill: #9c27b0;
+}
+
+/* 物种选择样式 */
+.species-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    height: 100%;
+}
+
+.species-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.species-card.selected {
+    border-color: #28a745;
+    background-color: #f0fff4;
+}
+
+.species-card .card-img-top {
+    height: 180px;
+    object-fit: cover;
+}
+
+.species-card .card-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.species-card .select-species {
+    width: 100%;
+}
+
+.species-card.selected .select-species {
+    background-color: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+
+/* 荧光绿色效果 */
+.fluorescent-green {
+    color: #39ff14;
+    text-shadow: 0 0 5px #39ff14, 0 0 10px #39ff14;
+}
+
+/* 铀添加后的试管效果 */
+.tube-liquid.uranium-added {
+    animation: glowing 1.5s infinite alternate;
+}
+
+@keyframes glowing {
+    from {
+        box-shadow: 0 0 5px #39ff14, 0 0 10px #39ff14;
+    }
+    to {
+        box-shadow: 0 0 10px #39ff14, 0 0 20px #39ff14, 0 0 30px #39ff14;
+    }
 } 
