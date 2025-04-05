@@ -1,0 +1,276 @@
+/* 全局样式 */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5;
+}
+
+/* 实验容器 */
+.experiment-container {
+    margin-bottom: 30px;
+}
+
+/* 步骤导航 */
+.list-group-item {
+    cursor: pointer;
+}
+
+/* PCR反应管样式 */
+.tube-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.tube {
+    width: 60px;
+    height: 150px;
+    background-color: #e0e0e0;
+    border-radius: 5px 5px 25px 25px;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid #999;
+}
+
+.tube-liquid {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 0;
+    background-color: #c8e6ff;
+    transition: height 0.5s ease-in-out;
+}
+
+/* PCR仪样式 */
+.pcr-machine {
+    background-color: #333;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.pcr-display {
+    background-color: #222;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-family: 'Courier New', monospace;
+}
+
+.pcr-status {
+    margin-bottom: 15px;
+}
+
+.pcr-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+/* 琼脂糖凝胶电泳结果 */
+.gel-electrophoresis {
+    background-color: #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+/* 添加试剂时的动画效果 */
+@keyframes addReagent {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.reagent-added {
+    animation: addReagent 0.5s ease-in-out;
+}
+
+/* 步骤进度条 */
+.step-progress {
+    margin: 20px 0;
+}
+
+/* 结果分析样式 */
+#result-analysis {
+    line-height: 1.6;
+}
+
+/* 温度变化效果 */
+.temp-change-hot {
+    color: #ff5252;
+    font-weight: bold;
+    transition: color 0.5s ease;
+}
+
+.temp-change-cold {
+    color: #4fc3f7;
+    font-weight: bold;
+    transition: color 0.5s ease;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .pcr-machine {
+        padding: 10px;
+    }
+    
+    .tube {
+        width: 40px;
+        height: 120px;
+    }
+}
+
+/* 按钮禁用状态样式 */
+.btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* 添加试剂按钮样式 */
+.add-reagent {
+    transition: all 0.3s ease;
+}
+
+.add-reagent.added {
+    background-color: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+
+/* PCR进度条样式 */
+.progress {
+    height: 20px;
+    background-color: #444;
+}
+
+.progress-bar {
+    background-color: #0d6efd;
+    transition: width 0.5s ease;
+}
+
+/* 实验步骤标题 */
+#step-title {
+    margin: 0;
+}
+
+/* 琼脂糖凝胶电泳图像 */
+#gel-canvas {
+    border: 1px solid #999;
+    background-color: #222;
+}
+
+/* DNA选取样式 */
+.trait-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.trait-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.trait-card.selected {
+    border-color: #0d6efd;
+    background-color: #f0f7ff;
+}
+
+.trait-card .card-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.trait-icon {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    color: #0d6efd;
+}
+
+/* 序列显示样式 */
+.sequence-display {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    font-family: 'Courier New', monospace;
+    overflow-x: auto;
+}
+
+.sequence-text {
+    font-family: 'Courier New', monospace;
+    word-wrap: break-word;
+    margin: 0;
+    line-height: 1.5;
+    color: #333;
+}
+
+/* 引物设计样式 */
+.primer-design-guide {
+    background-color: #e9ecef;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 15px;
+}
+
+.primer-matched {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.primer-error {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+/* DNA可视化样式 */
+.dna-visualization-container {
+    margin-bottom: 20px;
+}
+
+.dna-animation-area {
+    padding: 10px;
+    background-color: #f8f9fa;
+}
+
+.dna-stage {
+    position: relative;
+    border: 1px solid #ddd;
+    background-color: #f0f0f0;
+    overflow: hidden;
+}
+
+#dna-canvas {
+    display: block;
+    background-color: #ffffff;
+}
+
+.dna-stage-description {
+    text-align: center;
+    font-size: 14px;
+    color: #555;
+    padding: 5px;
+    background-color: #f0f0f0;
+    border-radius: 0 0 5px 5px;
+}
+
+/* DNA动画元素样式 */
+.dna-strand {
+    stroke-width: 2;
+    fill: none;
+}
+
+.dna-primer {
+    stroke-width: 3;
+    stroke-linecap: round;
+}
+
+.dna-polymerase {
+    fill: #9c27b0;
+} 
